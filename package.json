@@ -1,0 +1,38 @@
+{
+  "name": "xpict",
+  "version": "0.0.1",
+  "description": "Xpict é uma biblioteca para a geração de imagens padronizadas a partir de modelos declarativos.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/*",
+    "!/**/__tests__"
+  ],
+  "scripts": {
+    "playground:heroic-race": "ts-node ./playground/heroic-race.ts",
+    "test": "jest",
+    "build": "tsc"
+  },
+  "keywords": [
+    "xpict",
+    "image",
+    "template",
+    "canvas",
+    "sharp"
+  ],
+  "author": "Marcuth",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.0.3",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "canvas": "^3.2.0",
+    "sharp": "^0.34.5"
+  }
+}
