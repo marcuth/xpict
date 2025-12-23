@@ -11,11 +11,11 @@ export type TemplateConfig = {
 }
 
 export type TemplateOptions<Data> = {
-    imagePath: undefined
+    imagePath?: undefined
     config: TemplateConfig
     layers: Layer<Data>[]
 } | {
-    config: undefined
+    config?: undefined
     imagePath: string
     layers: Layer<Data>[]
 }
