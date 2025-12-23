@@ -20,16 +20,19 @@ export class ImageLayer<Data> extends Layer<Data> {
         super(options.when)
     }
 
-    async render(ctx: RenderContext, data: Data) {
-        const xValue = resolveAxis<Data>(this.options.x, data, 0)
-        const yValue = resolveAxis<Data>(this.options.y, data, 0)
+    async render(ctx: RenderContext, data: Data, index: number = 0) {
+        const localX = resolveAxis<Data>(this.options.x, data, index)
+        const localY = resolveAxis<Data>(this.options.y, data, index)
+
+        const x = ctx.offsetX + localX
+        const y = ctx.offsetY + localY
 
         const img = await sharp(this.options.src(data))
             .resize(this.options.width, this.options.height)
             .toBuffer() 
 
         ctx.image = ctx.image.composite([
-            { input: img, left: xValue, top: yValue }
+            { input: img, left: x, top: y }
         ])
     }
 }
