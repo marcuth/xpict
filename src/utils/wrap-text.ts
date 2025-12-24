@@ -18,5 +18,5 @@ export function wrapText(text: string, maxWidth: number) {
 
     lines.push(line)
 
-    return lines.join("\n")
+    return lines
 }
