@@ -9,6 +9,6 @@ export async function commitFrame(image: sharp.Sharp) {
             width: metadata.width,
             height: metadata.height,
             channels: metadata.channels,
-        }
+        },
     })
 }

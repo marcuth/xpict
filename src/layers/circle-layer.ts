@@ -1,37 +1,45 @@
 import { createCanvas } from "canvas"
 
+import { Layer, RenderOptions, WhenOptions } from "./layer"
 import { Axis, resolveAxis } from "../utils/resolve-axis"
-import { RenderContext } from "../render-context"
-import { Layer } from "./layer"
 
 export type CircleLayerOptions<Data> = {
     x: Axis<Data>
     y: Axis<Data>
     radius: number
     fill: string
-    when?: (data: Data, index?: number) => boolean
+    when?: (options: WhenOptions<Data>) => boolean
 }
 
 export class CircleLayer<Data> extends Layer<Data> {
-    constructor(
-        private readonly options: CircleLayerOptions<Data>,
-    ) {
+    constructor(private readonly options: CircleLayerOptions<Data>) {
         super(options.when)
     }
 
-    async render(
-        ctx: RenderContext,
-        data: Data,
-        index: number = 0
-    ): Promise<void> {
+    async render({ context: ctx, data, index = 0, templateConfig }: RenderOptions<Data>): Promise<void> {
         const image = ctx.image
         const metadata = await image.metadata()
 
         const canvasWidth = metadata.width!
         const canvasHeight = metadata.height!
 
-        const x = ctx.offsetX + resolveAxis<Data>(this.options.x, data, index)
-        const y = ctx.offsetY + resolveAxis<Data>(this.options.y, data, index)
+        const x =
+            ctx.offsetX +
+            resolveAxis<Data>({
+                axis: this.options.x,
+                data: data,
+                index: index,
+                templateConfig: templateConfig,
+            })
+
+        const y =
+            ctx.offsetY +
+            resolveAxis<Data>({
+                axis: this.options.y,
+                data: data,
+                index: index,
+                templateConfig: templateConfig,
+            })
 
         const { radius, fill } = this.options
 
@@ -50,8 +58,8 @@ export class CircleLayer<Data> extends Layer<Data> {
             {
                 input: circleBuffer,
                 top: 0,
-                left: 0
-            }
+                left: 0,
+            },
         ])
     }
 }

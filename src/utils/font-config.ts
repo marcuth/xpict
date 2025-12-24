@@ -2,7 +2,7 @@ import { FontOptions } from "../layers/text-layer"
 
 export type FontConfigOptions = {
     color?: string
-    name?: string
+    name: string
     filePath?: string
 }
 
@@ -15,7 +15,7 @@ export function fontConfig(options: FontConfigOptions) {
     return (partialOptions: PartialFontOptions): FontOptions => {
         return {
             ...options,
-            ...partialOptions
+            ...partialOptions,
         }
     }
 }

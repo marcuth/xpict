@@ -1,8 +1,7 @@
 import { createCanvas } from "canvas"
 
+import { Layer, RenderOptions, WhenFunction } from "./layer"
 import { Axis, resolveAxis } from "../utils/resolve-axis"
-import { RenderContext } from "../render-context"
-import { Layer } from "./layer"
 
 export type RectangleLayerOptions<Data> = {
     x: Axis<Data>
@@ -16,34 +15,36 @@ export type RectangleLayerOptions<Data> = {
 export class RectangleLayer<Data> extends Layer<Data> {
     constructor(
         private readonly options: RectangleLayerOptions<Data>,
-        when?: (data: Data, index?: number) => boolean
+        when?: WhenFunction<Data>,
     ) {
         super(when)
     }
 
-    async render(
-        ctx: RenderContext,
-        data: Data,
-        index: number = 0
-    ): Promise<void> {
+    async render({ context: ctx, data, index = 0, templateConfig }: RenderOptions<Data>): Promise<void> {
         const image = ctx.image
         const metadata = await image.metadata()
 
         const canvasWidth = metadata.width
         const canvasHeight = metadata.height
 
-        const localX = resolveAxis<Data>(this.options.x, data, index)
-        const localY = resolveAxis<Data>(this.options.y, data, index)
+        const localX = resolveAxis<Data>({
+            axis: this.options.x,
+            data: data,
+            index: index,
+            templateConfig: templateConfig,
+        })
+
+        const localY = resolveAxis<Data>({
+            axis: this.options.y,
+            data: data,
+            index: index,
+            templateConfig: templateConfig,
+        })
 
         const x = ctx.offsetX + localX
         const y = ctx.offsetY + localY
 
-        const {
-            width,
-            height,
-            fill,
-            borderRadius
-        } = this.options
+        const { width, height, fill, borderRadius } = this.options
 
         const canvas = createCanvas(canvasWidth, canvasHeight)
         const context = canvas.getContext("2d")
@@ -75,8 +76,8 @@ export class RectangleLayer<Data> extends Layer<Data> {
             {
                 input: rectangleBuffer,
                 top: 0,
-                left: 0
-            }
+                left: 0,
+            },
         ])
     }
 }

@@ -10,18 +10,37 @@ export type TemplateConfig = {
     fill?: Color
 }
 
+export type InputTemplateOptions<Data> =
+    | {
+          imagePath?: undefined
+          config: TemplateConfig
+          layers: Layer<Data>[]
+      }
+    | {
+          config?: undefined
+          imagePath: string
+          layers: Layer<Data>[]
+      }
+
 export type TemplateOptions<Data> = {
-    imagePath?: undefined
-    config: TemplateConfig
-    layers: Layer<Data>[]
-} | {
-    config?: undefined
-    imagePath: string
+    imagePath?: string
+    config?: TemplateConfig
     layers: Layer<Data>[]
 }
 
+const transparentFill = {
+    r: 0,
+    g: 0,
+    b: 0,
+    alpha: 0,
+}
+
 export class Template<Data> {
-    constructor(public readonly options: TemplateOptions<Data>) {}
+    readonly options: TemplateOptions<Data>
+
+    constructor(options: InputTemplateOptions<Data>) {
+        this.options = options
+    }
 
     async render(data: Data): Promise<sharp.Sharp> {
         let image: sharp.Sharp
@@ -34,27 +53,34 @@ export class Template<Data> {
                     width: width,
                     height: height,
                     channels: 4,
-                    background: fill ?? {
-                        r: 0,
-                        g: 0,
-                        b: 0,
-                        alpha: 0
-                    }
-                }
+                    background: fill ?? transparentFill,
+                },
             })
         } else {
             image = sharp(this.options.imagePath)
+            const metadata = await image.metadata()
+
+            this.options.config = {
+                width: metadata.width,
+                height: metadata.height,
+            }
         }
 
         const ctx: RenderContext = {
             image: image,
             offsetX: 0,
-            offsetY: 0
+            offsetY: 0,
         }
 
         for (const layer of this.options.layers) {
             if (!layer.shouldRender(data)) continue
-            await layer.render(ctx, data)
+
+            await layer.render({
+                context: ctx,
+                data: data,
+                templateConfig: this.options.config,
+            })
+
             ctx.image = await commitFrame(ctx.image)
         }
 

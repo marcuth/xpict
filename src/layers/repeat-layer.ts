@@ -1,33 +1,48 @@
+import { Layer, RenderOptions, WhenFunction } from "./layer"
 import { Axis, resolveAxis } from "../utils/resolve-axis"
 import { commitFrame } from "../utils/commit-frame"
-import { RenderContext } from "../render-context"
-import { Layer } from "./layer"
+
+export type EachOptions<Data> = {
+    data: Data
+    index: number
+}
+
+export type EachFunction<Data> = (options: EachOptions<Data>) => any[]
 
 export type RepeatLayerOptions<Data, Item> = {
-    each: (data: Data) => Item[]
+    each: EachFunction<Data>
     layer: (item: Item, index: number) => Layer<Data>
-    when?: (data: Data) => boolean
+    when?: WhenFunction<Data>
     x: Axis<Data>
     y: Axis<Data>
 }
 
 export class RepeatLayer<Data, Item> extends Layer<Data> {
-    constructor(
-        private readonly options: RepeatLayerOptions<Data, Item>,        
-    ) {
+    constructor(private readonly options: RepeatLayerOptions<Data, Item>) {
         super(options.when)
     }
 
-    async render(ctx: RenderContext, data: Data): Promise<void> {
-        const items = this.options.each(data)
+    async render({ context: ctx, data, index = 0, templateConfig }: RenderOptions<Data>): Promise<void> {
+        const items = this.options.each({ data: data, index: index })
 
         if (!items || items.length === 0) return
 
         for (let index = 0; index < items.length; index++) {
             const item = items[index]
 
-            const dx = resolveAxis<Data>(this.options.x, data, index)
-            const dy = resolveAxis<Data>(this.options.y, data, index)
+            const dx = resolveAxis<Data>({
+                axis: this.options.x,
+                data: data,
+                index: index,
+                templateConfig: templateConfig,
+            })
+
+            const dy = resolveAxis<Data>({
+                axis: this.options.y,
+                data: data,
+                index: index,
+                templateConfig: templateConfig,
+            })
 
             const prevX = ctx.offsetX
             const prevY = ctx.offsetY
@@ -36,7 +51,13 @@ export class RepeatLayer<Data, Item> extends Layer<Data> {
             ctx.offsetY += dy
 
             const layer = this.options.layer(item, index)
-            await layer.render(ctx, data, index)
+
+            await layer.render({
+                context: ctx,
+                data: data,
+                index: index,
+                templateConfig: templateConfig,
+            })
 
             ctx.image = await commitFrame(ctx.image)
             ctx.offsetX = prevX

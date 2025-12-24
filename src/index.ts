@@ -1,6 +1,27 @@
-import { GroupLayer, RepeatLayer, GroupLayerOptions, ImageLayer, ImageLayerOptions, LineLayer, LineLayerOptions, RectangleLayer, RectangleLayerOptions, RepeatLayerOptions, TextLayer, TextLayerOptions, CircleLayerOptions, CircleLayer } from "./layers"
-import { Template, TemplateOptions } from "./template"
+import {
+    GroupLayer,
+    RepeatLayer,
+    GroupLayerOptions,
+    ImageLayer,
+    ImageLayerOptions,
+    LineLayer,
+    LineLayerOptions,
+    RectangleLayer,
+    RectangleLayerOptions,
+    RepeatLayerOptions,
+    TextLayer,
+    TextLayerOptions,
+    CircleLayerOptions,
+    CircleLayer,
+} from "./layers"
+import { negativeEffect, blurEffect, grayscaleEffect } from "./effects"
+import { Template, InputTemplateOptions } from "./template"
 import { fontConfig } from "./utils/font-config"
+
+export * from "./layers"
+export * from "./effects"
+export * from "./template"
+export * from "./utils/font-config"
 
 const xpict = {
     rectangle<Data>(options: RectangleLayerOptions<Data>) {
@@ -24,10 +45,15 @@ const xpict = {
     line<Data>(options: LineLayerOptions<Data>) {
         return new LineLayer<Data>(options)
     },
-    template<Data>(options: TemplateOptions<Data>) {
+    template<Data>(options: InputTemplateOptions<Data>) {
         return new Template<Data>(options)
     },
-    fontConfig: fontConfig
+    fontConfig: fontConfig,
+    effects: {
+        negative: negativeEffect,
+        blur: blurEffect,
+        grayscale: grayscaleEffect,
+    },
 }
 
 export default xpict

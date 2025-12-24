@@ -1,1 +1,4 @@
 src/
+.eslintrc.json
+.prettierrc.js
+__tests__

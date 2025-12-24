@@ -1,8 +1,7 @@
 import { createCanvas, registerFont } from "canvas"
 
+import { Layer, RenderOptions, WhenFunction } from "./layer"
 import { Axis, resolveAxis } from "../utils/resolve-axis"
-import { RenderContext } from "../render-context"
-import { Layer } from "./layer"
 
 export type FontOptions = {
     size: number
@@ -12,17 +11,30 @@ export type FontOptions = {
 }
 
 export type TextAnchor =
-    | "top-left" | "top-center" | "top-right"
-    | "middle-left" | "middle-center" | "middle-right"
-    | "bottom-left" | "bottom-center" | "bottom-right"
+    | "top-left"
+    | "top-center"
+    | "top-right"
+    | "middle-left"
+    | "middle-center"
+    | "middle-right"
+    | "bottom-left"
+    | "bottom-center"
+    | "bottom-right"
 
 export type Stroke = {
     fill: string
     width: number
 }
 
+export type TextFunctionOptions<Data> = {
+    data: Data
+    index: number
+}
+
+export type StringFunction<Data> = (options: TextFunctionOptions<Data>) => string
+
 export type TextLayerOptions<Data> = {
-    text: (data: Data) => string
+    text: StringFunction<Data> | string
     font: FontOptions
     x: Axis<Data>
     y: Axis<Data>
@@ -30,7 +42,7 @@ export type TextLayerOptions<Data> = {
     anchor?: TextAnchor
     stroke?: Stroke
     rotation?: number
-    when?: (data: Data) => boolean
+    when?: WhenFunction<Data>
 }
 
 const anchorOffsets: Record<TextAnchor, (w: number, h: number) => { x: number; y: number }> = {
@@ -42,20 +54,18 @@ const anchorOffsets: Record<TextAnchor, (w: number, h: number) => { x: number; y
     "middle-right": (w, h) => ({ x: -w, y: -h / 2 }),
     "bottom-left": (w, h) => ({ x: 0, y: -h }),
     "bottom-center": (w, h) => ({ x: -w / 2, y: -h }),
-    "bottom-right": (w, h) => ({ x: -w, y: -h })
+    "bottom-right": (w, h) => ({ x: -w, y: -h }),
 }
 
 export class TextLayer<Data> extends Layer<Data> {
-    constructor(
-        private readonly options: TextLayerOptions<Data>
-    ) {
+    constructor(private readonly options: TextLayerOptions<Data>) {
         super(options.when)
     }
 
-    async render(ctx: RenderContext, data: Data): Promise<void> {
+    async render({ context: ctx, data, index = 0, templateConfig }: RenderOptions<Data>): Promise<void> {
         const imageMetadata = await ctx.image.metadata()
-        const width = imageMetadata.width!
-        const height = imageMetadata.height!
+        const width = imageMetadata.width
+        const height = imageMetadata.height
 
         const {
             text,
@@ -65,11 +75,15 @@ export class TextLayer<Data> extends Layer<Data> {
             backgroundColor = "transparent",
             anchor = "top-left",
             stroke,
-            rotation = 0
+            rotation = 0,
         } = this.options
 
+        if (!font.name) {
+            throw new Error("Font name is required")
+        }
+
         if (font.filePath) {
-            registerFont(font.filePath, { family: font.name! })
+            registerFont(font.filePath, { family: font.name })
         }
 
         const canvas = createCanvas(width, height)
@@ -83,15 +97,26 @@ export class TextLayer<Data> extends Layer<Data> {
         context.font = `${font.size}px ${font.name ?? "Arial"}`
         context.fillStyle = font.color ?? "#000"
 
-        const content = text(data)
+        const content = typeof text === "string" ? text : text({ data: data, index: index })
         const metrics = context.measureText(content)
         const textWidth = metrics.width
         const textHeight = font.size
 
         const offset = anchorOffsets[anchor](textWidth, textHeight)
 
-        const localX = resolveAxis<Data>(initialX, data, 0)
-        const localY = resolveAxis<Data>(initialY, data, 0)
+        const localX = resolveAxis<Data>({
+            axis: initialX,
+            data: data,
+            index: index,
+            templateConfig: templateConfig,
+        })
+
+        const localY = resolveAxis<Data>({
+            axis: initialY,
+            data: data,
+            index: index,
+            templateConfig: templateConfig,
+        })
 
         const x = ctx.offsetX + localX
         const y = ctx.offsetY + localY
@@ -115,8 +140,6 @@ export class TextLayer<Data> extends Layer<Data> {
 
         const buffer = canvas.toBuffer()
 
-        ctx.image = ctx.image.composite([
-            { input: buffer, top: 0, left: 0 }
-        ])
+        ctx.image = ctx.image.composite([{ input: buffer, top: 0, left: 0 }])
     }
 }
