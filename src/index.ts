@@ -16,7 +16,7 @@ import {
 } from "./layers"
 import { negativeEffect, blurEffect, grayscaleEffect } from "./effects"
 import { Template, InputTemplateOptions } from "./template"
-import { fontConfig } from "./utils/font-config"
+import { wrapText, fontConfig } from "./utils"
 
 export * from "./layers"
 export * from "./effects"
@@ -48,11 +48,14 @@ const xpict = {
     template<Data>(options: InputTemplateOptions<Data>) {
         return new Template<Data>(options)
     },
-    fontConfig: fontConfig,
     effects: {
         negative: negativeEffect,
         blur: blurEffect,
         grayscale: grayscaleEffect,
+    },
+    utils: {
+        fontConfig: fontConfig,
+        wrapText: wrapText,
     },
 }
 
