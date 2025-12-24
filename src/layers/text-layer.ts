@@ -114,19 +114,9 @@ export class TextLayer<Data> extends Layer<Data> {
         context.fillStyle = font.color ?? "#000"
 
         const content = typeof text === "string" ? text : text({ data: data, index: index })
-        const lines = content.split("\n")
-        const sampleMetrics = context.measureText("M")
-        const lineHeight = sampleMetrics.actualBoundingBoxAscent + sampleMetrics.actualBoundingBoxDescent
-
-        let maxWidth = 0
-
-        for (const line of lines) {
-            const metrics = context.measureText(line)
-            maxWidth = Math.max(maxWidth, metrics.width)
-        }
-
-        const textWidth = maxWidth
-        const textHeight = lines.length * lineHeight
+        const metrics = context.measureText(content)
+        const textWidth = metrics.width
+        const textHeight = font.size
 
         const offset = anchorOffsets[anchor](textWidth, textHeight)
 
@@ -154,19 +144,14 @@ export class TextLayer<Data> extends Layer<Data> {
         context.translate(adjustedX, adjustedY)
         context.rotate((rotation * Math.PI) / 180)
 
-        lines.forEach((line, i) => {
-            const y = i * lineHeight
+        if (stroke) {
+            context.strokeStyle = stroke.fill
+            context.lineWidth = stroke.width
+            context.lineJoin = "round"
+            context.strokeText(content, 0, 0)
+        }
 
-            if (stroke) {
-                context.strokeStyle = stroke.fill
-                context.lineWidth = stroke.width
-                context.lineJoin = "round"
-                context.strokeText(line, 0, y)
-            }
-
-            context.fillText(line, 0, y)
-        })
-
+        context.fillText(content, 0, 0)
         context.restore()
 
         const buffer = canvas.toBuffer()
