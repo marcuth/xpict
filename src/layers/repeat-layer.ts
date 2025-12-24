@@ -7,10 +7,10 @@ export type EachOptions<Data> = {
     index: number
 }
 
-export type EachFunction<Data> = (options: EachOptions<Data>) => any[]
+export type EachFunction<Data, Item> = (options: EachOptions<Data>) => Item[]
 
 export type RepeatLayerOptions<Data, Item> = {
-    each: EachFunction<Data>
+    each: EachFunction<Data, Item>
     layer: (item: Item, index: number) => Layer<Data>
     when?: WhenFunction<Data>
     x: Axis<Data>
