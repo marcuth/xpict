@@ -33,6 +33,10 @@ export type TextFunctionOptions<Data> = {
 
 export type StringFunction<Data> = (options: TextFunctionOptions<Data>) => string
 
+export type TextAlign = "left" | "center" | "right"
+
+export type TextBaseline = "top" | "hanging" | "middle" | "alphabetic" | "ideographic" | "bottom"
+
 export type TextLayerOptions<Data> = {
     text: StringFunction<Data> | string
     font: FontOptions
@@ -40,6 +44,8 @@ export type TextLayerOptions<Data> = {
     y: Axis<Data>
     backgroundColor?: string
     anchor?: TextAnchor
+    align?: TextAlign
+    baseline?: TextBaseline
     stroke?: Stroke
     rotation?: number
     when?: WhenFunction<Data>
@@ -76,6 +82,8 @@ export class TextLayer<Data> extends Layer<Data> {
             anchor = "top-left",
             stroke,
             rotation = 0,
+            align,
+            baseline,
         } = this.options
 
         if (!font.name) {
@@ -92,6 +100,14 @@ export class TextLayer<Data> extends Layer<Data> {
         if (backgroundColor !== "transparent") {
             context.fillStyle = backgroundColor
             context.fillRect(0, 0, width, height)
+        }
+
+        if (align) {
+            context.textAlign = align
+        }
+
+        if (baseline) {
+            context.textBaseline = baseline
         }
 
         context.font = `${font.size}px ${font.name ?? "Arial"}`
