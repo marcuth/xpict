@@ -21,7 +21,7 @@ import { fontConfig } from "./utils/font-config"
 export * from "./layers"
 export * from "./effects"
 export * from "./template"
-export * from "./utils/font-config"
+export * from "./utils"
 
 const xpict = {
     rectangle<Data>(options: RectangleLayerOptions<Data>) {
