@@ -9,9 +9,16 @@ export type EachOptions<Data> = {
 
 export type EachFunction<Data, Item> = (options: EachOptions<Data>) => Item[]
 
+export type LayerFunctionOptions = {
+    index: number
+    length: number
+}
+
+export type LayerFunction<Data, Item> = (item: Item, options: LayerFunctionOptions) => Layer<Data>
+
 export type RepeatLayerOptions<Data, Item> = {
     each: EachFunction<Data, Item>
-    layer: (item: Item, index: number) => Layer<Data>
+    layer: LayerFunction<Data, Item>
     when?: WhenFunction<Data>
     x: Axis<Data>
     y: Axis<Data>
@@ -50,7 +57,7 @@ export class RepeatLayer<Data, Item> extends Layer<Data> {
             ctx.offsetX += dx
             ctx.offsetY += dy
 
-            const layer = this.options.layer(item, index)
+            const layer = this.options.layer(item, { index: index, length: items.length })
 
             await layer.render({
                 context: ctx,
