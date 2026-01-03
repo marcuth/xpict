@@ -68,7 +68,9 @@ export class ImageLayer<Data> extends Layer<Data> {
         }
 
         if (this.options.rotate !== undefined) {
-            img = img.rotate(this.options.rotate)
+            img = img.rotate(this.options.rotate, {
+                background: { r: 0, g: 0, b: 0, alpha: 0 }
+            })
         }
 
         if (this.options.transform && this.options.transform.length > 0) {
