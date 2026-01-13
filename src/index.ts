@@ -21,6 +21,7 @@ export * from "./layers"
 export * from "./effects"
 export * from "./template"
 export * from "./utils"
+export * from "./error"
 
 const xpict = {
     rectangle<Data>(options: RectangleLayerOptions<Data>) {

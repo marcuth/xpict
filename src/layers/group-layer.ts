@@ -5,8 +5,8 @@ import { commitFrame } from "../utils/commit-frame"
 
 export type GroupLayerOptions<Data> = {
     layers: Layer<Data>[]
-    x: Axis<Data>
-    y: Axis<Data>
+    x?: Axis<Data>
+    y?: Axis<Data>
     when?: (options: WhenOptions<Data>) => boolean
 }
 
@@ -17,14 +17,14 @@ export class GroupLayer<Data> extends Layer<Data> {
 
     async render({ context: ctx, data, index = 0, templateConfig }: RenderOptions<Data>) {
         const dx = resolveAxis<Data>({
-            axis: this.options.x,
+            axis: this.options.x ?? 0,
             data: data,
             index: index,
             templateConfig: templateConfig,
         })
 
         const dy = resolveAxis<Data>({
-            axis: this.options.y,
+            axis: this.options.y ?? 0,
             data: data,
             index: index,
             templateConfig: templateConfig,
