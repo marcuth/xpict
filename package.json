@@ -1,6 +1,6 @@
 {
   "name": "xpict",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Xpict é uma biblioteca para a geração de imagens padronizadas a partir de modelos declarativos.",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
