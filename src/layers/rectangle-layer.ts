@@ -10,14 +10,14 @@ export type RectangleLayerOptions<Data> = {
     height: number
     fill: string
     borderRadius?: number
+    when?: WhenFunction<Data>
 }
 
 export class RectangleLayer<Data> extends Layer<Data> {
     constructor(
         private readonly options: RectangleLayerOptions<Data>,
-        when?: WhenFunction<Data>,
     ) {
-        super(when)
+        super(options.when)
     }
 
     async render({ context: ctx, data, index = 0, templateConfig }: RenderOptions<Data>): Promise<void> {
