@@ -1,2 +1,2 @@
 export * from "./wrap-text"
-export * from "./font-config"
+export * from "./font"

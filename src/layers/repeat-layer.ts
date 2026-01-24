@@ -1,6 +1,5 @@
 import { Layer, RenderOptions, WhenFunction } from "./layer"
 import { Axis, resolveAxis } from "../utils/resolve-axis"
-import { commitFrame } from "../utils/commit-frame"
 
 export type EachOptions<Data> = {
     data: Data
@@ -66,7 +65,6 @@ export class RepeatLayer<Data, Item> extends Layer<Data> {
                 templateConfig: templateConfig,
             })
 
-            ctx.image = await commitFrame(ctx.image)
             ctx.offsetX = prevX
             ctx.offsetY = prevY
         }

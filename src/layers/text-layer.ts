@@ -1,25 +1,8 @@
-import { createCanvas, registerFont } from "canvas"
-
 import { Layer, RenderOptions, WhenFunction } from "./layer"
 import { Axis, resolveAxis } from "../utils/resolve-axis"
-
-export type FontOptions = {
-    size: number
-    color?: string
-    name?: string
-    filePath?: string
-}
-
-export type TextAnchor =
-    | "top-left"
-    | "top-center"
-    | "top-right"
-    | "middle-left"
-    | "middle-center"
-    | "middle-right"
-    | "bottom-left"
-    | "bottom-center"
-    | "bottom-right"
+import { ValueOfEnum } from "../utils/value-of-enum"
+import { TextBaseline, TextAlign } from "../enums"
+import { Font } from "../utils/font"
 
 export type Stroke = {
     fill: string
@@ -33,34 +16,16 @@ export type TextFunctionOptions<Data> = {
 
 export type StringFunction<Data> = (options: TextFunctionOptions<Data>) => string
 
-export type TextAlign = "left" | "center" | "right"
-
-export type TextBaseline = "top" | "hanging" | "middle" | "alphabetic" | "ideographic" | "bottom"
-
 export type TextLayerOptions<Data> = {
     text: StringFunction<Data> | string
-    font: FontOptions
+    font: Font
     x: Axis<Data>
     y: Axis<Data>
-    backgroundColor?: string
-    anchor?: TextAnchor
-    align?: TextAlign
-    baseline?: TextBaseline
+    align?: ValueOfEnum<TextAlign>
+    baseline?: ValueOfEnum<TextBaseline>
     stroke?: Stroke
     rotation?: number
     when?: WhenFunction<Data>
-}
-
-const anchorOffsets: Record<TextAnchor, (w: number, h: number) => { x: number; y: number }> = {
-    "top-left": (w, h) => ({ x: 0, y: 0 }),
-    "top-center": (w, h) => ({ x: -w / 2, y: 0 }),
-    "top-right": (w, h) => ({ x: -w, y: 0 }),
-    "middle-left": (w, h) => ({ x: 0, y: -h / 2 }),
-    "middle-center": (w, h) => ({ x: -w / 2, y: -h / 2 }),
-    "middle-right": (w, h) => ({ x: -w, y: -h / 2 }),
-    "bottom-left": (w, h) => ({ x: 0, y: -h }),
-    "bottom-center": (w, h) => ({ x: -w / 2, y: -h }),
-    "bottom-right": (w, h) => ({ x: -w, y: -h }),
 }
 
 export class TextLayer<Data> extends Layer<Data> {
@@ -68,39 +33,10 @@ export class TextLayer<Data> extends Layer<Data> {
         super(options.when)
     }
 
-    async render({ context: ctx, data, index = 0, templateConfig }: RenderOptions<Data>): Promise<void> {
-        const imageMetadata = await ctx.image.metadata()
-        const width = imageMetadata.width
-        const height = imageMetadata.height
+    async render({ context: renderContext, data, index = 0, templateConfig }: RenderOptions<Data>): Promise<void> {
+        const { text, font, x: initialX, y: initialY, stroke, rotation = 0, align, baseline } = this.options
 
-        const {
-            text,
-            font,
-            x: initialX,
-            y: initialY,
-            backgroundColor = "transparent",
-            anchor = "top-left",
-            stroke,
-            rotation = 0,
-            align,
-            baseline,
-        } = this.options
-
-        if (!font.name) {
-            throw new Error("Font name is required")
-        }
-
-        if (font.filePath) {
-            registerFont(font.filePath, { family: font.name })
-        }
-
-        const canvas = createCanvas(width, height)
-        const context = canvas.getContext("2d")
-
-        if (backgroundColor !== "transparent") {
-            context.fillStyle = backgroundColor
-            context.fillRect(0, 0, width, height)
-        }
+        const context = renderContext.ctx
 
         if (align) {
             context.textAlign = align
@@ -114,11 +50,6 @@ export class TextLayer<Data> extends Layer<Data> {
         context.fillStyle = font.color ?? "#000"
 
         const content = typeof text === "string" ? text : text({ data: data, index: index })
-        const metrics = context.measureText(content)
-        const textWidth = metrics.width
-        const textHeight = font.size
-
-        const offset = anchorOffsets[anchor](textWidth, textHeight)
 
         const localX = resolveAxis<Data>({
             axis: initialX,
@@ -134,14 +65,11 @@ export class TextLayer<Data> extends Layer<Data> {
             templateConfig: templateConfig,
         })
 
-        const x = ctx.offsetX + localX
-        const y = ctx.offsetY + localY
-
-        const adjustedX = x + offset.x
-        const adjustedY = y + offset.y
+        const x = renderContext.offsetX + localX
+        const y = renderContext.offsetY + localY
 
         context.save()
-        context.translate(adjustedX, adjustedY)
+        context.translate(x, y)
         context.rotate((rotation * Math.PI) / 180)
 
         if (stroke) {
@@ -153,9 +81,5 @@ export class TextLayer<Data> extends Layer<Data> {
 
         context.fillText(content, 0, 0)
         context.restore()
-
-        const buffer = canvas.toBuffer()
-
-        ctx.image = ctx.image.composite([{ input: buffer, top: 0, left: 0 }])
     }
 }

@@ -1,7 +1,7 @@
-import sharp from "sharp"
+import { SKRSContext2D } from "@napi-rs/canvas"
 
 export type RenderContext = {
-    image: sharp.Sharp
+    ctx: SKRSContext2D
     offsetX: number
     offsetY: number
 }

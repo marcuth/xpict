@@ -1,5 +1,3 @@
-import { createCanvas } from "canvas"
-
 import { Layer, RenderOptions, WhenFunction } from "./layer"
 import { Axis, resolveAxis } from "../utils/resolve-axis"
 
@@ -22,15 +20,9 @@ export class LineLayer<Data> extends Layer<Data> {
         super(options.when)
     }
 
-    async render({ context: ctx, data, index = 0, templateConfig }: RenderOptions<Data>): Promise<void> {
-        const image = ctx.image
-        const metadata = await image.metadata()
-
-        const canvasWidth = metadata.width!
-        const canvasHeight = metadata.height!
-
+    async render({ context: renderContext, data, index = 0, templateConfig }: RenderOptions<Data>): Promise<void> {
         const x1 =
-            ctx.offsetX +
+            renderContext.offsetX +
             resolveAxis<Data>({
                 axis: this.options.from.x,
                 data: data,
@@ -39,7 +31,7 @@ export class LineLayer<Data> extends Layer<Data> {
             })
 
         const y1 =
-            ctx.offsetY +
+            renderContext.offsetY +
             resolveAxis<Data>({
                 axis: this.options.from.y,
                 data: data,
@@ -48,7 +40,7 @@ export class LineLayer<Data> extends Layer<Data> {
             })
 
         const x2 =
-            ctx.offsetX +
+            renderContext.offsetX +
             resolveAxis<Data>({
                 axis: this.options.to.x,
                 data: data,
@@ -57,7 +49,7 @@ export class LineLayer<Data> extends Layer<Data> {
             })
 
         const y2 =
-            ctx.offsetY +
+            renderContext.offsetY +
             resolveAxis<Data>({
                 axis: this.options.to.y,
                 data: data,
@@ -65,8 +57,7 @@ export class LineLayer<Data> extends Layer<Data> {
                 templateConfig: templateConfig,
             })
 
-        const canvas = createCanvas(canvasWidth, canvasHeight)
-        const context = canvas.getContext("2d")
+        const context = renderContext.ctx
 
         context.strokeStyle = this.options.color
         context.lineWidth = this.options.width
@@ -76,15 +67,5 @@ export class LineLayer<Data> extends Layer<Data> {
         context.moveTo(x1, y1)
         context.lineTo(x2, y2)
         context.stroke()
-
-        const lineBuffer = canvas.toBuffer()
-
-        ctx.image = image.composite([
-            {
-                input: lineBuffer,
-                top: 0,
-                left: 0,
-            },
-        ])
     }
 }

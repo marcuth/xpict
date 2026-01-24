@@ -1,5 +1,3 @@
-import { createCanvas } from "canvas"
-
 import { Layer, RenderOptions, WhenOptions } from "./layer"
 import { Axis, resolveAxis } from "../utils/resolve-axis"
 
@@ -16,15 +14,9 @@ export class CircleLayer<Data> extends Layer<Data> {
         super(options.when)
     }
 
-    async render({ context: ctx, data, index = 0, templateConfig }: RenderOptions<Data>): Promise<void> {
-        const image = ctx.image
-        const metadata = await image.metadata()
-
-        const canvasWidth = metadata.width!
-        const canvasHeight = metadata.height!
-
+    async render({ context: renderContext, data, index = 0, templateConfig }: RenderOptions<Data>): Promise<void> {
         const x =
-            ctx.offsetX +
+            renderContext.offsetX +
             resolveAxis<Data>({
                 axis: this.options.x,
                 data: data,
@@ -33,7 +25,7 @@ export class CircleLayer<Data> extends Layer<Data> {
             })
 
         const y =
-            ctx.offsetY +
+            renderContext.offsetY +
             resolveAxis<Data>({
                 axis: this.options.y,
                 data: data,
@@ -43,23 +35,12 @@ export class CircleLayer<Data> extends Layer<Data> {
 
         const { radius, fill } = this.options
 
-        const canvas = createCanvas(canvasWidth, canvasHeight)
-        const context = canvas.getContext("2d")
+        const context = renderContext.ctx
 
         context.beginPath()
         context.arc(x, y, radius, 0, Math.PI * 2)
         context.closePath()
         context.fillStyle = fill
         context.fill()
-
-        const circleBuffer = canvas.toBuffer()
-
-        ctx.image = image.composite([
-            {
-                input: circleBuffer,
-                top: 0,
-                left: 0,
-            },
-        ])
     }
 }

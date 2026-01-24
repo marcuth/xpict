@@ -14,11 +14,12 @@ import {
     CircleLayerOptions,
     CircleLayer,
 } from "./layers"
-import { negativeEffect, blurEffect, grayscaleEffect } from "./effects"
 import { Template, InputTemplateOptions } from "./template"
+import * as utils from "./utils"
+import * as effects from "./effects"
 
-export * from "./layers"
 export * from "./effects"
+export * from "./layers"
 export * from "./template"
 export * from "./utils"
 export * from "./error"
@@ -48,11 +49,8 @@ const xpict = {
     template<Data>(options: InputTemplateOptions<Data>) {
         return new Template<Data>(options)
     },
-    effects: {
-        negative: negativeEffect,
-        blur: blurEffect,
-        grayscale: grayscaleEffect,
-    },
+    effects: effects,
+    utils: utils,
 }
 
 export default xpict

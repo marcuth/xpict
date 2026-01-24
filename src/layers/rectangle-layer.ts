@@ -1,5 +1,3 @@
-import { createCanvas } from "canvas"
-
 import { Layer, RenderOptions, WhenFunction } from "./layer"
 import { Axis, resolveAxis } from "../utils/resolve-axis"
 
@@ -14,19 +12,11 @@ export type RectangleLayerOptions<Data> = {
 }
 
 export class RectangleLayer<Data> extends Layer<Data> {
-    constructor(
-        private readonly options: RectangleLayerOptions<Data>,
-    ) {
+    constructor(private readonly options: RectangleLayerOptions<Data>) {
         super(options.when)
     }
 
-    async render({ context: ctx, data, index = 0, templateConfig }: RenderOptions<Data>): Promise<void> {
-        const image = ctx.image
-        const metadata = await image.metadata()
-
-        const canvasWidth = metadata.width
-        const canvasHeight = metadata.height
-
+    async render({ context: renderContext, data, index = 0, templateConfig }: RenderOptions<Data>): Promise<void> {
         const localX = resolveAxis<Data>({
             axis: this.options.x,
             data: data,
@@ -41,13 +31,12 @@ export class RectangleLayer<Data> extends Layer<Data> {
             templateConfig: templateConfig,
         })
 
-        const x = ctx.offsetX + localX
-        const y = ctx.offsetY + localY
+        const x = renderContext.offsetX + localX
+        const y = renderContext.offsetY + localY
 
         const { width, height, fill, borderRadius } = this.options
 
-        const canvas = createCanvas(canvasWidth, canvasHeight)
-        const context = canvas.getContext("2d")
+        const context = renderContext.ctx
 
         context.fillStyle = fill
 
@@ -69,15 +58,5 @@ export class RectangleLayer<Data> extends Layer<Data> {
         } else {
             context.fillRect(x, y, width, height)
         }
-
-        const rectangleBuffer = canvas.toBuffer()
-
-        ctx.image = image.composite([
-            {
-                input: rectangleBuffer,
-                top: 0,
-                left: 0,
-            },
-        ])
     }
 }

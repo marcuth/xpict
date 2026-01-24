@@ -1,7 +1,6 @@
 import { Layer, RenderOptions, WhenOptions } from "./layer"
 
 import { Axis, resolveAxis } from "../utils/resolve-axis"
-import { commitFrame } from "../utils/commit-frame"
 
 export type GroupLayerOptions<Data> = {
     layers: Layer<Data>[]
@@ -45,8 +44,6 @@ export class GroupLayer<Data> extends Layer<Data> {
                 index: index,
                 templateConfig: templateConfig,
             })
-
-            ctx.image = await commitFrame(ctx.image)
         }
 
         ctx.offsetX = prevX

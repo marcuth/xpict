@@ -1,3 +1,3 @@
 export * from "./blur"
 export * from "./grayscale"
-export * from "./negative"
+export * from "./box-blur"

@@ -1,4 +1,4 @@
-import sharp from "sharp"
+import { Canvas, createCanvas, SKRSContext2D, loadImage } from "@napi-rs/canvas"
 
 import { Layer, RenderOptions, WhenFunction } from "./layer"
 import { Axis, resolveAxis } from "../utils/resolve-axis"
@@ -7,10 +7,11 @@ import { XpictError } from "../error"
 export type TransformOptions<Data> = {
     data: Data
     index: number
-    image: sharp.Sharp
+    canvas: Canvas
+    ctx: SKRSContext2D
 }
 
-export type ImageTransformFunction<Data> = (options: TransformOptions<Data>) => sharp.Sharp | Promise<sharp.Sharp>
+export type ImageTransformFunction<Data> = (options: TransformOptions<Data>) => void | Promise<void>
 
 export type ImageImageSrcOptions<Data> = {
     data: Data
@@ -37,7 +38,7 @@ export class ImageLayer<Data> extends Layer<Data> {
         super(options.when)
     }
 
-    async render({ context: ctx, data, index = 0, templateConfig }: RenderOptions<Data>) {
+    async render({ context: renderContext, data, index = 0, templateConfig }: RenderOptions<Data>) {
         const localX = resolveAxis<Data>({
             axis: this.options.x,
             data: data,
@@ -52,42 +53,49 @@ export class ImageLayer<Data> extends Layer<Data> {
             templateConfig: templateConfig,
         })
 
-        const x = ctx.offsetX + localX
-        const y = ctx.offsetY + localY
+        const x = renderContext.offsetX + localX
+        const y = renderContext.offsetY + localY
 
         const src = this.options.src
         const resolvedImageSource = typeof src === "string" ? src : src({ data: data, index: index })
+        const image = await loadImage(resolvedImageSource)
+        const localCanvas = createCanvas(image.width, image.height)
+        const localContext = localCanvas.getContext("2d")
 
         try {
-            let img = sharp(resolvedImageSource).resize(this.options.width, this.options.height)
+            localContext.drawImage(image, 0, 0)
 
             if (this.options.flipX) {
-                img = img.flop()
+                localContext.translate(image.width, 0)
+                localContext.scale(-1, 1)
             }
 
             if (this.options.flipY) {
-                img = img.flip()
+                localContext.translate(0, image.height)
+                localContext.scale(1, -1)
             }
 
             if (this.options.rotate !== undefined) {
-                img = img.rotate(this.options.rotate, {
-                    background: { r: 0, g: 0, b: 0, alpha: 0 },
-                })
+                localContext.translate(image.width / 2, image.height / 2)
+                localContext.rotate((this.options.rotate * Math.PI) / 180)
+                localContext.translate(-image.width / 2, -image.height / 2)
             }
 
             if (this.options.transform && this.options.transform.length > 0) {
                 for (const transform of this.options.transform) {
-                    img = await transform({
+                    await transform({
                         data: data,
                         index: index,
-                        image: img,
+                        canvas: localCanvas,
+                        ctx: localContext,
                     })
                 }
             }
 
-            const buffer = await img.toBuffer()
+            const buffer = localCanvas.toBuffer("image/png")
+            const finalImage = await loadImage(buffer)
 
-            ctx.image = ctx.image.composite([{ input: buffer, left: x, top: y }])
+            renderContext.ctx.drawImage(finalImage, x, y)
         } catch (error: any) {
             throw new XpictError(`Failed to render image layer (${resolvedImageSource}): ${error.message}`)
         }

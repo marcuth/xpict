@@ -1,13 +1,13 @@
-import sharp, { Color } from "sharp"
+import { Canvas, createCanvas, loadImage } from "@napi-rs/canvas"
 
-import { commitFrame } from "./utils/commit-frame"
 import { RenderContext } from "./render-context"
 import { Layer } from "./layers/layer"
+import { XpictError } from "./error"
 
 export type TemplateConfig = {
     width: number
     height: number
-    fill?: Color
+    fill?: string
 }
 
 export type InputTemplateOptions<Data> =
@@ -28,13 +28,6 @@ export type TemplateOptions<Data> = {
     layers: Layer<Data>[]
 }
 
-const transparentFill = {
-    r: 0,
-    g: 0,
-    b: 0,
-    alpha: 0,
-}
-
 export class Template<Data> {
     readonly options: TemplateOptions<Data>
 
@@ -42,32 +35,34 @@ export class Template<Data> {
         this.options = options
     }
 
-    async render(data: Data): Promise<sharp.Sharp> {
-        let image: sharp.Sharp
+    async render(data: Data): Promise<Canvas> {
+        let canvas: Canvas
 
         if (this.options.config) {
             const { width, height, fill } = this.options.config
+            canvas = createCanvas(width, height)
 
-            image = sharp({
-                create: {
-                    width: width,
-                    height: height,
-                    channels: 4,
-                    background: fill ?? transparentFill,
-                },
-            })
-        } else {
-            image = sharp(this.options.imagePath)
-            const metadata = await image.metadata()
+            if (fill) {
+                const ctx = canvas.getContext("2d")
+                ctx.fillStyle = fill
+                ctx.fillRect(0, 0, width, height)
+            }
+        } else if (this.options.imagePath) {
+            const backgroundImage = await loadImage(this.options.imagePath)
+            canvas = createCanvas(backgroundImage.width, backgroundImage.height)
 
             this.options.config = {
-                width: metadata.width,
-                height: metadata.height,
+                width: backgroundImage.width,
+                height: backgroundImage.height,
             }
+        } else {
+            throw new XpictError("No config or imagePath provided")
         }
 
-        const ctx: RenderContext = {
-            image: image,
+        const ctx = canvas.getContext("2d")
+
+        const renderContext: RenderContext = {
+            ctx: ctx,
             offsetX: 0,
             offsetY: 0,
         }
@@ -76,14 +71,12 @@ export class Template<Data> {
             if (!layer.shouldRender(data)) continue
 
             await layer.render({
-                context: ctx,
+                context: renderContext,
                 data: data,
                 templateConfig: this.options.config,
             })
-
-            ctx.image = await commitFrame(ctx.image)
         }
 
-        return ctx.image
+        return canvas
     }
 }
