@@ -1,3 +1,4 @@
+import { Dimension, resolveDimension } from "../utils/resolve-dimension"
 import { Layer, RenderOptions, WhenFunction } from "./layer"
 import { Axis, resolveAxis } from "../utils/resolve-axis"
 
@@ -11,7 +12,7 @@ export type LineLayerOptions<Data> = {
         y: Axis<Data>
     }
     color: string
-    width: number
+    width: Dimension<Data>
     when?: WhenFunction<Data>
 }
 
@@ -57,10 +58,17 @@ export class LineLayer<Data> extends Layer<Data> {
                 templateSize: templateConfig,
             })
 
+        const width = resolveDimension<Data>({
+            data: data,
+            dimension: this.options.width,
+            index: index,
+            templateSize: templateConfig,
+        })
+
         const context = renderContext.ctx
 
         context.strokeStyle = this.options.color
-        context.lineWidth = this.options.width
+        context.lineWidth = width
         context.lineCap = "round"
 
         context.beginPath()

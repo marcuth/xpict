@@ -1,11 +1,12 @@
+import { Dimension, resolveDimension } from "../utils/resolve-dimension"
 import { Layer, RenderOptions, WhenFunction } from "./layer"
 import { Axis, resolveAxis } from "../utils/resolve-axis"
 
 export type RectangleLayerOptions<Data> = {
     x: Axis<Data>
     y: Axis<Data>
-    width: number
-    height: number
+    width: Dimension<Data>
+    height: Dimension<Data>
     fill: string
     borderRadius?: number
     when?: WhenFunction<Data>
@@ -34,7 +35,21 @@ export class RectangleLayer<Data> extends Layer<Data> {
         const x = renderContext.offsetX + localX
         const y = renderContext.offsetY + localY
 
-        const { width, height, fill, borderRadius } = this.options
+        const { fill, borderRadius } = this.options
+
+        const width = resolveDimension<Data>({
+            data: data,
+            dimension: this.options.width,
+            index: index,
+            templateSize: templateConfig,
+        })
+
+        const height = resolveDimension<Data>({
+            data: data,
+            dimension: this.options.height,
+            index: index,
+            templateSize: templateConfig,
+        })
 
         const context = renderContext.ctx
 

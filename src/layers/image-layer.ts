@@ -1,5 +1,6 @@
 import { Canvas, createCanvas, SKRSContext2D, loadImage } from "@napi-rs/canvas"
 
+import { Dimension, resolveDimension } from "../utils/resolve-dimension"
 import { Layer, RenderOptions, WhenFunction } from "./layer"
 import { Axis, resolveAxis } from "../utils/resolve-axis"
 import { XpictError } from "../error"
@@ -24,8 +25,8 @@ export type ImageLayerOptions<Data> = {
     src: string | ImageSrcFunction<Data>
     x: Axis<Data>
     y: Axis<Data>
-    width?: number
-    height?: number
+    width?: Dimension<Data>
+    height?: Dimension<Data>
     flipX?: boolean
     flipY?: boolean
     rotate?: number
@@ -53,27 +54,69 @@ export class ImageLayer<Data> extends Layer<Data> {
             templateSize: templateConfig,
         })
 
+        const width = this.options.width
+            ? resolveDimension<Data>({
+                  data: data,
+                  dimension: this.options.width,
+                  index: index,
+                  templateSize: templateConfig,
+              })
+            : this.options.width
+
+        const height = this.options.height
+            ? resolveDimension<Data>({
+                  data: data,
+                  dimension: this.options.height,
+                  index: index,
+                  templateSize: templateConfig,
+              })
+            : this.options.height
+
         const x = renderContext.offsetX + localX
         const y = renderContext.offsetY + localY
 
         const src = this.options.src
         const resolvedImageSource = typeof src === "string" ? src : src({ data: data, index: index })
         const image = await loadImage(resolvedImageSource)
-        const localCanvas = createCanvas(image.width, image.height)
+
+        let finalWidth: number
+        let finalHeight: number
+
+        if (width && height) {
+            finalWidth = width
+            finalHeight = height
+        } else if (width) {
+            finalWidth = width
+            finalHeight = (width / image.width) * image.height
+        } else if (height) {
+            finalHeight = height
+            finalWidth = (height / image.height) * image.width
+        } else {
+            finalWidth = image.width
+            finalHeight = image.height
+        }
+
+        const localCanvas = createCanvas(finalWidth, finalHeight)
         const localContext = localCanvas.getContext("2d")
 
         try {
-            localContext.drawImage(image, 0, 0)
+            const hasRotaion = this.options.flipX || this.options.flipY || this.options.rotate !== undefined
 
-            if (this.options.flipX) {
-                localContext.translate(image.width, 0)
-                localContext.scale(-1, 1)
+            if (hasRotaion) {
+                localContext.translate(finalWidth / 2, finalHeight / 2)
+
+                if (this.options.rotate !== undefined) {
+                    localContext.rotate((this.options.rotate * Math.PI) / 180)
+                }
+
+                const scaleX = this.options.flipX ? -1 : 1
+                const scaleY = this.options.flipY ? -1 : 1
+                localContext.scale(scaleX, scaleY)
+
+                localContext.translate(-finalWidth / 2, -finalHeight / 2)
             }
 
-            if (this.options.flipY) {
-                localContext.translate(0, image.height)
-                localContext.scale(1, -1)
-            }
+            localContext.drawImage(image, 0, 0, finalWidth, finalHeight)
 
             if (this.options.rotate !== undefined) {
                 localContext.translate(image.width / 2, image.height / 2)
@@ -91,6 +134,8 @@ export class ImageLayer<Data> extends Layer<Data> {
                     })
                 }
             }
+
+            localContext.restore()
 
             const buffer = localCanvas.toBuffer("image/png")
             const finalImage = await loadImage(buffer)
