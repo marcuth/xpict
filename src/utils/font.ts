@@ -7,17 +7,20 @@ export type FontOptions = {
     color?: string
     name?: string
     filePath?: string
+    weight?: string
 }
 
 export type FontConfigOptions = {
     color?: string
     name: string
     filePath?: string
+    weight?: string
 }
 
 export type PartialFontOptions = {
     size: number
     color?: string
+    weight?: string
 }
 
 export type Font = Omit<FontOptions, "filePath">

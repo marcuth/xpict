@@ -46,7 +46,9 @@ export class TextLayer<Data> extends Layer<Data> {
             context.textBaseline = baseline
         }
 
-        context.font = `${font.size}px ${font.name ?? "Arial"}`
+        const adjustedFontWeight = font.weight ? font.weight + " ": ""
+
+        context.font = `${adjustedFontWeight}${font.size}px ${font.name ?? "Arial"}`
         context.fillStyle = font.color ?? "#000"
 
         const content = typeof text === "string" ? text : text({ data: data, index: index })
