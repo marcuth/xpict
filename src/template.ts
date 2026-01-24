@@ -4,9 +4,12 @@ import { RenderContext } from "./render-context"
 import { Layer } from "./layers/layer"
 import { XpictError } from "./error"
 
-export type TemplateConfig = {
+export type TemplateSize = {
     width: number
     height: number
+}
+
+export type TemplateConfig = TemplateSize & {
     fill?: string
 }
 

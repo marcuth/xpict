@@ -27,7 +27,7 @@ export class LineLayer<Data> extends Layer<Data> {
                 axis: this.options.from.x,
                 data: data,
                 index: index,
-                templateConfig: templateConfig,
+                templateSize: templateConfig,
             })
 
         const y1 =
@@ -36,7 +36,7 @@ export class LineLayer<Data> extends Layer<Data> {
                 axis: this.options.from.y,
                 data: data,
                 index: index,
-                templateConfig: templateConfig,
+                templateSize: templateConfig,
             })
 
         const x2 =
@@ -45,7 +45,7 @@ export class LineLayer<Data> extends Layer<Data> {
                 axis: this.options.to.x,
                 data: data,
                 index: index,
-                templateConfig: templateConfig,
+                templateSize: templateConfig,
             })
 
         const y2 =
@@ -54,7 +54,7 @@ export class LineLayer<Data> extends Layer<Data> {
                 axis: this.options.to.y,
                 data: data,
                 index: index,
-                templateConfig: templateConfig,
+                templateSize: templateConfig,
             })
 
         const context = renderContext.ctx

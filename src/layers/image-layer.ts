@@ -43,14 +43,14 @@ export class ImageLayer<Data> extends Layer<Data> {
             axis: this.options.x,
             data: data,
             index: index,
-            templateConfig: templateConfig,
+            templateSize: templateConfig,
         })
 
         const localY = resolveAxis<Data>({
             axis: this.options.y,
             data: data,
             index: index,
-            templateConfig: templateConfig,
+            templateSize: templateConfig,
         })
 
         const x = renderContext.offsetX + localX

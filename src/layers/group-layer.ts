@@ -19,14 +19,14 @@ export class GroupLayer<Data> extends Layer<Data> {
             axis: this.options.x ?? 0,
             data: data,
             index: index,
-            templateConfig: templateConfig,
+            templateSize: templateConfig,
         })
 
         const dy = resolveAxis<Data>({
             axis: this.options.y ?? 0,
             data: data,
             index: index,
-            templateConfig: templateConfig,
+            templateSize: templateConfig,
         })
 
         const prevX = ctx.offsetX

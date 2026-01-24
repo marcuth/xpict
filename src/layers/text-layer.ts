@@ -55,14 +55,14 @@ export class TextLayer<Data> extends Layer<Data> {
             axis: initialX,
             data: data,
             index: index,
-            templateConfig: templateConfig,
+            templateSize: templateConfig,
         })
 
         const localY = resolveAxis<Data>({
             axis: initialY,
             data: data,
             index: index,
-            templateConfig: templateConfig,
+            templateSize: templateConfig,
         })
 
         const x = renderContext.offsetX + localX

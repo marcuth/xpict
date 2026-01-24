@@ -21,7 +21,7 @@ export class CircleLayer<Data> extends Layer<Data> {
                 axis: this.options.x,
                 data: data,
                 index: index,
-                templateConfig: templateConfig,
+                templateSize: templateConfig,
             })
 
         const y =
@@ -30,7 +30,7 @@ export class CircleLayer<Data> extends Layer<Data> {
                 axis: this.options.y,
                 data: data,
                 index: index,
-                templateConfig: templateConfig,
+                templateSize: templateConfig,
             })
 
         const { radius, fill } = this.options

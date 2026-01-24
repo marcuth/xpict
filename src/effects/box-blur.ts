@@ -14,7 +14,10 @@ export function boxBlur<Data>(radius: number) {
 
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
-                let red = 0, green = 0, blue = 0, alpha = 0
+                let red = 0,
+                    green = 0,
+                    blue = 0,
+                    alpha = 0
                 let count = 0
 
                 for (let i = -r; i <= r; i++) {
@@ -42,7 +45,10 @@ export function boxBlur<Data>(radius: number) {
 
         for (let x = 0; x < width; x++) {
             for (let y = 0; y < height; y++) {
-                let red = 0, green = 0, blue = 0, alpha = 0
+                let red = 0,
+                    green = 0,
+                    blue = 0,
+                    alpha = 0
                 let count = 0
 
                 for (let i = -r; i <= r; i++) {

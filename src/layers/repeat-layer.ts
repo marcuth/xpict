@@ -40,14 +40,14 @@ export class RepeatLayer<Data, Item> extends Layer<Data> {
                 axis: this.options.x,
                 data: data,
                 index: index,
-                templateConfig: templateConfig,
+                templateSize: templateConfig,
             })
 
             const dy = resolveAxis<Data>({
                 axis: this.options.y,
                 data: data,
                 index: index,
-                templateConfig: templateConfig,
+                templateSize: templateConfig,
             })
 
             const prevX = ctx.offsetX

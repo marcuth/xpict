@@ -15,8 +15,8 @@ import {
     CircleLayer,
 } from "./layers"
 import { Template, InputTemplateOptions } from "./template"
-import * as utils from "./utils"
 import * as effects from "./effects"
+import * as utils from "./utils"
 
 export * from "./effects"
 export * from "./layers"
