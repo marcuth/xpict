@@ -266,12 +266,14 @@ xpict.image({
 
 ---
 
-## 🧪 Tests (Not included yet, CONTRIBUTE! :D)
+## 🧪 Tests
 
-Automated tests are located in `__tests__`. To run them:
+Tests are written with [Vitest](https://vitest.dev) and live in `__tests__`. The library maintains **100% coverage** (statements, branches, functions and lines), enforced by a threshold in `vitest.config.mts`.
 
 ```bash
-npm run test
+npm run test            # run the test suite once
+npm run test:watch      # watch mode
+npm run test:coverage   # run with coverage report (also written to ./coverage)
 
 ```
 
