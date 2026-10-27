@@ -1,12 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { createCanvas, GlobalFonts } from "@napi-rs/canvas"
-import fs from "node:fs"
-import os from "node:os"
-import path from "node:path"
 
-import xpict, { XpictError } from "../src"
-import { TextAlign, TextBaseline } from "../src/enums"
+import path from "node:path"
+import os from "node:os"
+import fs from "node:fs"
+
 import { BLANK, pixel, RED, solidPng } from "./helpers"
+import { TextAlign, TextBaseline } from "../src/enums"
+import xpict, { XpictError } from "../src"
 
 type Data = { n: number }
 const data: Data = { n: 1 }
@@ -189,7 +190,12 @@ describe("effects", () => {
         effect({ data, index: 0, canvas, ctx })
         return canvas
     }
-    const untouched = () => pixel(run(() => {}), 3, 3)
+    const untouched = () =>
+        pixel(
+            run(() => {}),
+            3,
+            3,
+        )
 
     it("blur softens the edge and skips radius <= 0", () => {
         expect(pixel(run(xpict.effects.blur(0)), 3, 3)).toEqual(untouched())
@@ -264,13 +270,6 @@ describe("enums", () => {
         expect(TextAlign.Center).toBe("center")
         expect(TextAlign.Left).toBe("left")
         expect(TextAlign.Right).toBe("right")
-        expect(Object.values(TextBaseline)).toEqual([
-            "top",
-            "hanging",
-            "middle",
-            "alphabetic",
-            "ideographic",
-            "bottom",
-        ])
+        expect(Object.values(TextBaseline)).toEqual(["top", "hanging", "middle", "alphabetic", "ideographic", "bottom"])
     })
 })

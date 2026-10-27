@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "build": "tsc",
-    "format": "prettier --write \"src/**/*.ts\" \"__tests__/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\" \"__tests__/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"__tests__/**/*.ts\""
   },
   "keywords": [
     "xpict",

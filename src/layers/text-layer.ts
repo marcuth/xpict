@@ -46,7 +46,7 @@ export class TextLayer<Data> extends Layer<Data> {
             context.textBaseline = baseline
         }
 
-        const adjustedFontWeight = font.weight ? font.weight + " ": ""
+        const adjustedFontWeight = font.weight ? font.weight + " " : ""
 
         context.font = `${adjustedFontWeight}${font.size}px ${font.name ?? "Arial"}`
         context.fillStyle = font.color ?? "#000"
