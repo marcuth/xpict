@@ -21,20 +21,20 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Format
-        run: npm run format
-      - name: Commit formatting changes
+      - name: Fix lint and formatting
+        run: npm run lint:fix
+      - name: Commit lint fixes
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add -A
-            git commit -m "style: format code"
+            git commit -m "style: apply lint fixes"
             git push
           fi
-      - name: Check formatting
-        run: npm run format:check
+      - name: Lint
+        run: npm run lint
       - run: npx tsc --noEmit
 
   test:

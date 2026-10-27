@@ -16,7 +16,8 @@
     "test:coverage": "vitest run --coverage",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"__tests__/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\" \"__tests__/**/*.ts\""
+    "lint": "eslint src __tests__",
+    "lint:fix": "eslint src __tests__ --fix"
   },
   "keywords": [
     "xpict",
@@ -29,15 +30,18 @@
   "license": "MIT",
   "type": "commonjs",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^25.0.3",
     "@vitest/coverage-v8": "^5.0.5",
     "eslint": "^10.0.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "prettier": "^3.8.1",
     "prettier-plugin-sort-imports": "^1.8.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.1",
     "vitest": "^5.0.5"
   },
   "dependencies": {
